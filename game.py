@@ -17,17 +17,16 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 165, 0)
-GREY = (192, 192, 192)  # Color for the Remove button
 
 # Button definitions
 button_width, button_height = 100, 50
-button_colors = {'RED': RED, 'BLUE': BLUE, 'GREEN': GREEN, 'ORANGE': ORANGE, 'REMOVE': GREY}
+button_colors = {'RED': RED, 'BLUE': BLUE, 'GREEN': GREEN, 'ORANGE': ORANGE, 'REMOVE': BLACK}
 buttons = {
     'RED': pygame.Rect(50, height - button_height - 10, button_width, button_height),
     'BLUE': pygame.Rect(160, height - button_height - 10, button_width, button_height),
     'GREEN': pygame.Rect(270, height - button_height - 10, button_width, button_height),
     'ORANGE': pygame.Rect(380, height - button_height - 10, button_width, button_height),
-    'REMOVE': pygame.Rect(490, height - button_height - 10, button_width, button_height)  # Remove button
+    'REMOVE': pygame.Rect(500, height - button_height - 10, button_width, button_height)
 }
 
 # Arrays to store the coordinates of colored cells
@@ -44,7 +43,7 @@ color_cell_lists = {
     'ORANGE': orange_cells
 }
 
-# List of all color cell lists (excluding the current color list)
+# List of all color cell lists
 all_color_cell_lists = [red_cells, blue_cells, green_cells, orange_cells]
 
 # Function to draw the grid and color cells
@@ -65,10 +64,18 @@ def draw_grid():
                 pygame.draw.rect(screen, ORANGE, rect)
             pygame.draw.rect(screen, WHITE, rect, 1)
 
-# Function to draw buttons
+# Function to draw buttons with white borders
 def draw_buttons():
+    border_thickness = 1  # Thickness of the border
+
     for name, rect in buttons.items():
+        # Draw the button background
         pygame.draw.rect(screen, button_colors[name], rect)
+        # Draw the button border
+        border_rect = pygame.Rect(rect.x - border_thickness, rect.y - border_thickness, rect.width + 2 * border_thickness, rect.height + 2 * border_thickness)
+        pygame.draw.rect(screen, WHITE, border_rect, border_thickness)
+        
+        # Draw the text on the button
         font = pygame.font.SysFont(None, 24)
         text = font.render(name, True, WHITE)
         screen.blit(text, (rect.x + (button_width // 2 - text.get_width() // 2), rect.y + (button_height // 2 - text.get_height() // 2)))
@@ -89,25 +96,22 @@ while running:
             # Check if any button was clicked
             for name, rect in buttons.items():
                 if rect.collidepoint(mouse_x, mouse_y):
-                    if name == 'REMOVE':
-                        # Clear all colored cells
-                        for cells in all_color_cell_lists:
-                            cells.clear()
-                    else:
-                        current_color = name  # Set the selected color
+                    current_color = name  # Set the selected color
 
             # Determine the clicked cell if it's not on a button
             if mouse_y < height - button_height - 20:  # Ignore clicks on the button area
                 clicked_cell = (mouse_x // cell_size, mouse_y // cell_size)
 
-                # Remove clicked_cell from all lists except the one corresponding to current_color
-                for cells in all_color_cell_lists:
-                    if cells is not color_cell_lists[current_color] and clicked_cell in cells:
-                        cells.remove(clicked_cell)
-
-                # Add the clicked cell to the list corresponding to current_color if not already present
-                if clicked_cell not in color_cell_lists[current_color]:
-                    color_cell_lists[current_color].append(clicked_cell)
+                # Handle cell coloring or erasing
+                if current_color == 'REMOVE':
+                    # Remove clicked_cell from all lists
+                    for cells in all_color_cell_lists:
+                        if clicked_cell in cells:
+                            cells.remove(clicked_cell)
+                else:
+                    # Add the clicked cell to the list corresponding to current_color if not already present
+                    if clicked_cell not in color_cell_lists[current_color]:
+                        color_cell_lists[current_color].append(clicked_cell)
 
     # Fill the background
     screen.fill(BLACK)
@@ -117,7 +121,6 @@ while running:
 
     # Draw buttons
     draw_buttons()
-    print(blue_cells , ",", green_cells)
 
     # Update the display
     pygame.display.flip()
