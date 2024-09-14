@@ -17,15 +17,17 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 165, 0)
+GREY = (192, 192, 192)  # Color for the Remove button
 
 # Button definitions
 button_width, button_height = 100, 50
-button_colors = {'RED': RED, 'BLUE': BLUE, 'GREEN': GREEN, 'ORANGE': ORANGE}
+button_colors = {'RED': RED, 'BLUE': BLUE, 'GREEN': GREEN, 'ORANGE': ORANGE, 'REMOVE': GREY}
 buttons = {
     'RED': pygame.Rect(50, height - button_height - 10, button_width, button_height),
     'BLUE': pygame.Rect(160, height - button_height - 10, button_width, button_height),
     'GREEN': pygame.Rect(270, height - button_height - 10, button_width, button_height),
-    'ORANGE': pygame.Rect(380, height - button_height - 10, button_width, button_height)
+    'ORANGE': pygame.Rect(380, height - button_height - 10, button_width, button_height),
+    'REMOVE': pygame.Rect(490, height - button_height - 10, button_width, button_height)  # Remove button
 }
 
 # Arrays to store the coordinates of colored cells
@@ -33,6 +35,17 @@ red_cells = []
 blue_cells = []
 green_cells = []
 orange_cells = []
+
+# Create a dictionary to map color names to their corresponding cell lists
+color_cell_lists = {
+    'RED': red_cells,
+    'BLUE': blue_cells,
+    'GREEN': green_cells,
+    'ORANGE': orange_cells
+}
+
+# List of all color cell lists (excluding the current color list)
+all_color_cell_lists = [red_cells, blue_cells, green_cells, orange_cells]
 
 # Function to draw the grid and color cells
 def draw_grid():
@@ -76,49 +89,25 @@ while running:
             # Check if any button was clicked
             for name, rect in buttons.items():
                 if rect.collidepoint(mouse_x, mouse_y):
-                    current_color = name  # Set the selected color
+                    if name == 'REMOVE':
+                        # Clear all colored cells
+                        for cells in all_color_cell_lists:
+                            cells.clear()
+                    else:
+                        current_color = name  # Set the selected color
 
             # Determine the clicked cell if it's not on a button
             if mouse_y < height - button_height - 20:  # Ignore clicks on the button area
                 clicked_cell = (mouse_x // cell_size, mouse_y // cell_size)
 
-                # Add the clicked cell to the respective color array and remove it from others
-                if current_color == 'RED':
-                    if clicked_cell not in red_cells:
-                        red_cells.append(clicked_cell)
-                    if clicked_cell in blue_cells:
-                        blue_cells.remove(clicked_cell)
-                    if clicked_cell in green_cells:
-                        green_cells.remove(clicked_cell)
-                    if clicked_cell in orange_cells:
-                        orange_cells.remove(clicked_cell)
-                elif current_color == 'BLUE':
-                    if clicked_cell not in blue_cells:
-                        blue_cells.append(clicked_cell)
-                    if clicked_cell in red_cells:
-                        red_cells.remove(clicked_cell)
-                    if clicked_cell in green_cells:
-                        green_cells.remove(clicked_cell)
-                    if clicked_cell in orange_cells:
-                        orange_cells.remove(clicked_cell)
-                elif current_color == 'GREEN':
-                    if clicked_cell not in green_cells:
-                        green_cells.append(clicked_cell)
-                    if clicked_cell in red_cells:
-                        red_cells.remove(clicked_cell)
-                    if clicked_cell in blue_cells:
-                        blue_cells.remove(clicked_cell)
-                    if clicked_cell in orange_cells:
-                        orange_cells.remove(clicked_cell)
-                elif current_color == 'ORANGE':
-                    if clicked_cell not in orange_cells:
-                        orange_cells.append(clicked_cell)
-                    if clicked_cell in red_cells:
-                        red_cells.remove(clicked_cell)
-                    if clicked_cell in blue_cells:
-                        blue_cells.remove(clicked_cell)
-                    if clicked_cell in green_cells:
-                        green_cells.remove(clicked_cell)
+                # Remove clicked_cell from all lists except the one corresponding to current_color
+                for cells in all_color_cell_lists:
+                    if cells is not color_cell_lists[current_color] and clicked_cell in cells:
+                        cells.remove(clicked_cell)
+
+                # Add the clicked cell to the list corresponding to current_color if not already present
+                if clicked_cell not in color_cell_lists[current_color]:
+                    color_cell_lists[current_color].append(clicked_cell)
 
     # Fill the background
     screen.fill(BLACK)
@@ -128,6 +117,7 @@ while running:
 
     # Draw buttons
     draw_buttons()
+    print(blue_cells , ",", green_cells)
 
     # Update the display
     pygame.display.flip()
