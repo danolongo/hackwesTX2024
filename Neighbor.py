@@ -1,4 +1,4 @@
- as np
+import numpy as np
 
 class Cell:
     def __init__(self,identity, state):
@@ -19,15 +19,22 @@ class Cell:
                 transmitter_array.append(self.neighbors[n])
         return transmitter_array
 
-    def find_neuron(self):
+    def find_neurons(self):
         neuron_array = []
         for n in range(len(self.neighbors)):
             if self.neighbors[n].state == 3:
                 neuron_array.append(self.neighbors[n])
         return neuron_array
 
+    def find_neurons_firing(self):
+        neuron_array = []
+        for n in range(len(self.neighbors)):
+            if self.neighbors[n].state == 4:
+                neuron_array.append(self.neighbors[n])
+        return neuron_array
 
-rows, cols = (8, 8)
+
+rows, cols = (9, 9)
 cell_array = np.empty((rows, cols), dtype=object)
 
 #Fill array with cells with state 0
@@ -36,6 +43,16 @@ for i in range(rows):
     for j in range(cols):
         cell_array[i, j] = Cell(n, 0)
         n += 1
+
+# Define the quadrants (top-left, top-right, bottom-left, bottom-right)
+mid_row = rows // 2
+mid_col = cols // 2
+
+# Create four separate arrays for each quadrant
+top_left_array = cell_array[:mid_row, :mid_col]
+top_right_array = cell_array[:mid_row, mid_col:]
+bottom_left_array = cell_array[mid_row:, :mid_col]
+bottom_right_array = cell_array[mid_row:, mid_col:]
 
 #Fill neighbor array in cells
 for i in range(rows):
@@ -80,6 +97,32 @@ print()
 for i in range(rows):
     for j in range(cols):
         print(i, j, "  ", cell_array[i, j].identity, "  ", [x.identity for x in cell_array[i, j].neighbors])
+print()
 
 for n in range(len(cell_array[0,0].find_transmitters())):
     print(cell_array[0,0].find_transmitters()[n].identity)
+print()
+
+print("Top Left Array:")
+for row in top_left_array:
+    for cell in row:
+        print(cell.identity, end=" ")
+    print()
+
+print("\nTop Right Array:")
+for row in top_right_array:
+    for cell in row:
+        print(cell.identity, end=" ")
+    print()
+
+print("\nBottom Left Array:")
+for row in bottom_left_array:
+    for cell in row:
+        print(cell.identity, end=" ")
+    print()
+
+print("\nBottom Right Array:")
+for row in bottom_right_array:
+    for cell in row:
+        print(cell.identity, end=" ")
+    print()
