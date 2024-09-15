@@ -1,12 +1,15 @@
 import pygame
 import sys
 import numpy as np
+import time
 #
 class Cell:
     def __init__(self,identity, state):
         self.identity = identity
         self.state = state
         self.neighbors = []
+        self.signal = 0
+        self.enabled = False
 
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
@@ -108,13 +111,14 @@ for i in range(rows):
         if i < len(cell_array) - 1:
             cell_array[i, j].add_neighbor(cell_array[i + 1, j])
 #
-running = True
+building = True
+running = False
 current_color = button_colors[0]  # Default color is the first button color (RED)
 current_color_map = {}
 current_state = 4  # Default state corresponds to "FIRING"
 #
 #Main loop logic executed directly
-while running:
+while building:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -129,7 +133,8 @@ while running:
                 if rect.collidepoint(mouse_x, mouse_y):
                     button_label = button_texts[idx]
                     if button_label == "START":
-                        print("START")  # Print "START" if the START button is clicked
+                        running = True
+                        building = False # Print "START" if the START button is clicked
                     else:
                         current_color = button_colors[idx]  # Set the selected color
                         current_state = state_mapping[button_label]  # Set the current state (0-4)
@@ -147,11 +152,7 @@ while running:
                 cell_array[clicked_cell[1], clicked_cell[0]].set_state(current_state)
                 #
                 # Print Cell State, Testing
-                for i in range(rows):
-                    for j in range(cols):
-                        print(cell_array[i, j].state, end=" ")
-                    print()
-                print()
+
     # Fill the background
     screen.fill(BLACK)
     #
@@ -171,3 +172,33 @@ while running:
     #
     # Update display
     pygame.display.flip()
+#
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.VIDEORESIZE:
+            screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+    
+    for i in range(rows):
+        for j in range(cols):
+            if cell_array[i, j].state == 1:
+                # Power Logic
+            elif cell_array[i, j].state == 2:
+                # Connecting Logic
+            elif cell_array[i, j].state == 3:
+                # Resting Logic
+            elif cell_array[i, j].state == 4:
+                # Firing Logic
+    #
+    # Print cell states while running is true
+    for i in range(rows):
+        for j in range(cols):
+            print(cell_array[i, j].state, end=" ")
+        print()  # Newline after each row
+    print()  # Extra newline for spacing between iterations
+
+    # Update display
+    pygame.display.flip()
+    time.sleep(1)
