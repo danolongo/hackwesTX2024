@@ -1,4 +1,4 @@
- as np
+import numpy as np
 
 class Cell:
     def __init__(self,identity, state):
